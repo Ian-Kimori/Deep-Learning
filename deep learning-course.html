@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Learning: End-to-End Engineering Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --surface3: #1c2330;
+    --border: #212a35;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --accent4: #10b981;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --text-dim: #3d444d;
+    --red: #f85149;
+    --yellow: #d29922;
+    --green: #3fb950;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 10;
+  }
+
+  .course-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .progress-bar-wrap {
+    margin-top: 12px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .nav-section {
+    padding: 10px 0;
+  }
+
+  .nav-section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    padding: 8px 20px 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover {
+    background: var(--surface2);
+    border-left-color: var(--border);
+  }
+
+  .nav-item.active {
+    background: rgba(0,212,255,0.06);
+    border-left-color: var(--accent);
+  }
+
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.active .nav-label { color: var(--text); }
+
+  .nav-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    min-width: 24px;
+  }
+
+  .nav-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.3;
+    font-weight: 400;
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .nav-item.completed .nav-dot { background: var(--green); }
+  .nav-item.active .nav-dot { background: var(--accent); }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 280px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .badge-blue { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); }
+  .badge-orange { background: rgba(255,107,53,0.1); color: var(--accent2); border: 1px solid rgba(255,107,53,0.2); }
+  .badge-purple { background: rgba(124,58,237,0.1); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2); }
+  .badge-green { background: rgba(16,185,129,0.1); color: var(--accent4); border: 1px solid rgba(16,185,129,0.2); }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .meta-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .meta-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* CONTENT SECTIONS */
+  .content {
+    padding: 0;
+  }
+
+  .module {
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+
+  .module.active { display: block; }
+
+  .module-header {
+    padding: 48px 60px 32px;
+    position: relative;
+  }
+
+  .module-header::before {
+    content: attr(data-num);
+    position: absolute;
+    right: 60px;
+    top: 48px;
+    font-family: 'Syne', sans-serif;
+    font-size: 96px;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .module-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .module-num-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .module h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  .module-desc {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 640px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .module-body {
+    padding: 0 60px 48px;
+  }
+
+  /* LESSON */
+  .lesson {
+    margin-bottom: 48px;
+  }
+
+  .lesson-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .lesson-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .lesson p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #c9d1d9;
+    margin-bottom: 14px;
+    font-weight: 300;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .code-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  pre {
+    padding: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #e6edf3;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .num { color: #79c0ff; }
+  .cm { color: #8b949e; font-style: italic; }
+  .op { color: #ff7b72; }
+  .var { color: #ffa657; }
+  .cls { color: #f0883e; }
+
+  /* MATH BLOCKS */
+  .math-block {
+    background: linear-gradient(135deg, rgba(0,212,255,0.04), rgba(124,58,237,0.04));
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--accent);
+  }
+
+  .math-block .math-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  /* TABLES */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: var(--surface3);
+  }
+
+  th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: #c9d1d9;
+    line-height: 1.5;
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  td code, p code {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    background: var(--surface3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  /* CALLOUTS */
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .callout-content { flex: 1; }
+
+  .callout-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .callout-body {
+    font-size: 13px;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .callout.info {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.2);
+  }
+  .callout.info .callout-title { color: var(--accent); }
+  .callout.info .callout-body { color: #8bc4cf; }
+
+  .callout.warning {
+    background: rgba(210,153,34,0.05);
+    border: 1px solid rgba(210,153,34,0.2);
+  }
+  .callout.warning .callout-title { color: var(--yellow); }
+  .callout.warning .callout-body { color: #b8973a; }
+
+  .callout.danger {
+    background: rgba(248,81,73,0.05);
+    border: 1px solid rgba(248,81,73,0.2);
+  }
+  .callout.danger .callout-title { color: var(--red); }
+  .callout.danger .callout-body { color: #c47a76; }
+
+  .callout.success {
+    background: rgba(16,185,129,0.05);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+  .callout.success .callout-title { color: var(--accent4); }
+  .callout.success .callout-body { color: #5fa88e; }
+
+  /* ATTACK CARDS */
+  .attack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .attack-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .attack-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .attack-card.critical::before { background: var(--red); }
+  .attack-card.high::before { background: var(--accent2); }
+  .attack-card.medium::before { background: var(--yellow); }
+
+  .attack-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .attack-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .attack-severity {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .attack-card.critical .attack-severity { color: var(--red); }
+  .attack-card.high .attack-severity { color: var(--accent2); }
+  .attack-card.medium .attack-severity { color: var(--yellow); }
+
+  .attack-desc {
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 300;
+  }
+
+  .attack-mitigate {
+    font-size: 11px;
+    color: var(--accent4);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .attack-mitigate::before { content: '✓ '; }
+
+  /* NAVIGATION BUTTONS */
+  .module-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 60px;
+    border-top: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .nav-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .nav-btn:disabled:hover {
+    border-color: var(--border);
+    color: var(--text-muted);
+    background: var(--surface2);
+  }
+
+  .nav-btn.primary {
+    background: rgba(0,212,255,0.1);
+    border-color: rgba(0,212,255,0.3);
+    color: var(--accent);
+  }
+
+  .nav-btn.primary:hover {
+    background: rgba(0,212,255,0.2);
+  }
+
+  .module-indicator {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* SECTION DIVIDERS */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 32px 0 24px;
+  }
+
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-divider-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* PIPELINE DIAGRAM */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 20px 0;
+    margin: 20px 0;
+  }
+
+  .pipeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .pipeline-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .pipeline-box:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.04);
+  }
+
+  .pipeline-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    text-align: center;
+    max-width: 80px;
+  }
+
+  .pipeline-arrow {
+    font-size: 16px;
+    color: var(--text-dim);
+    padding: 0 4px;
+    flex-shrink: 0;
+    margin-bottom: 20px;
+  }
+
+  /* LAYER CARDS */
+  .layer-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .layer-card {
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    transition: all 0.2s;
+  }
+
+  .layer-card:hover {
+    border-color: rgba(0,212,255,0.3);
+    background: rgba(0,212,255,0.02);
+  }
+
+  .layer-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .layer-formula {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .layer-use {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  /* KEY INSIGHT */
+  .key-insight {
+    background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(0,212,255,0.05));
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .key-insight::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    font-size: 80px;
+    color: rgba(124,58,237,0.15);
+    font-family: Georgia, serif;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .key-insight-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+  }
+
+  .key-insight-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { width: 240px; }
+    .main { margin-left: 240px; }
+    .hero, .module-header, .module-body, .module-nav { padding-left: 32px; padding-right: 32px; }
+    .module-header::before { display: none; }
+  }
+
+  @media (max-width: 680px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .hero, .module-header, .module-body, .module-nav { padding-left: 20px; padding-right: 20px; }
+    .menu-toggle { display: flex; }
+    .layer-card { grid-template-columns: 1fr; }
+  }
+
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 18px;
+  }
+
+  /* SCROLL */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="course-label">Engineering Course</div>
+    <div class="sidebar-title">Deep Learning: End-to-End</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">0 / 7 modules</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Foundation</div>
+    <div class="nav-item active" data-module="0" onclick="goTo(0)">
+      <span class="nav-num">01</span>
+      <span class="nav-label">What is Deep Learning?</span>
+      <span class="nav-dot"></span>
+    </div>
+    <div class="nav-item" data-module="1" onclick="goTo(1)">
+      <span class="nav-num">02</span>
+      <span class="nav-label">Network Architecture & Layers</span>
+      <span class="nav-dot"></span>
+    </div>
+    <div class="nav-item" data-module="2" onclick="goTo(2)">
+      <span class="nav-num">03</span>
+      <span class="nav-label">Data Pipelines & Representations</span>
+      <span class="nav-dot"></span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Core Mechanics</div>
+    <div class="nav-item" data-module="3" onclick="goTo(3)">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Training & Backpropagation</span>
+      <span class="nav-dot"></span>
+    </div>
+    <div class="nav-item" data-module="4" onclick="goTo(4)">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Inference & Deployment</span>
+      <span class="nav-dot"></span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Advanced</div>
+    <div class="nav-item" data-module="5" onclick="goTo(5)">
+      <span class="nav-num">06</span>
+      <span class="nav-label">Interpretability & The Black Box</span>
+      <span class="nav-dot"></span>
+    </div>
+    <div class="nav-item" data-module="6" onclick="goTo(6)">
+      <span class="nav-num">07</span>
+      <span class="nav-label">Adversarial ML & Security</span>
+      <span class="nav-dot"></span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO (shown only on module 0) -->
+  <div class="hero" id="hero">
+    <div class="hero-eyebrow">
+      <span class="badge badge-blue">ML Engineering</span>
+      <span class="badge badge-orange">Cybersecurity</span>
+      <span class="badge badge-purple">Graduate Level</span>
+    </div>
+    <h1>Deep Learning<br><span>End-to-End</span></h1>
+    <p class="hero-sub">A complete technical course covering neural network architecture, training mechanics, inference, interpretability, and adversarial security — from first principles to industry practice.</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <span class="meta-val">7</span>
+        <span class="meta-label">Modules</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-val">28</span>
+        <span class="meta-label">Lessons</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-val">2</span>
+        <span class="meta-label">Disciplines</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-val">∞</span>
+        <span class="meta-label">Depth</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 1 ==================== -->
+  <div class="module active" id="module-0">
+    <div class="module-header" data-num="01">
+      <div class="module-eyebrow">
+        <span class="badge badge-blue">Module 01</span>
+        <span class="module-num-label">Foundation</span>
+      </div>
+      <h2>What Is Deep Learning?</h2>
+      <p class="module-desc">Understand where deep learning sits in the AI landscape, when to use it vs classical ML, and the fundamental mathematical object at its core — the artificial neuron.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">1.1 — The AI Landscape: Choosing Your Tool</div>
+        <p>The term "AI model" is broad enough to encompass everything from a linear regression to GPT-4. The first engineering decision is whether deep learning is the right tool for the problem. It is not a default — it is the right choice under specific conditions.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Approach</th><th>When to Use</th><th>Strengths</th><th>Weaknesses</th></tr></thead>
+            <tbody>
+              <tr><td><code>Linear / Logistic Regression</code></td><td>Simple relationships, baseline</td><td>Interpretable, fast</td><td>Cannot learn non-linear patterns</td></tr>
+              <tr><td><code>Random Forest / XGBoost</code></td><td>Tabular data, structured features</td><td>Handles missing data, fast train</td><td>Poor on raw images/text/audio</td></tr>
+              <tr><td><code>SVM</code></td><td>Small datasets, high-dimensional</td><td>Strong theoretical guarantees</td><td>Doesn't scale, kernel choice hard</td></tr>
+              <tr><td><code>Deep Learning (NN)</code></td><td>Images, text, audio, video, large data</td><td>Learns hierarchical representations automatically</td><td>Data hungry, compute expensive, opaque</td></tr>
+              <tr><td><code>Hybrid (Feature Eng + NN)</code></td><td>Domain knowledge available + scale</td><td>Best of both</td><td>Engineering overhead</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">The Rule of Thumb</div>
+            <div class="callout-body">If a human expert can manually engineer good features, classical ML often wins on small-to-medium datasets. Deep learning shines when the features themselves are too complex to articulate — like "what makes this image a cat."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">1.2 — The Artificial Neuron: Mathematical Foundation</div>
+        <p>Every deep learning model, regardless of complexity, is built from one primitive: the artificial neuron. It is a mathematical function that takes a weighted sum of inputs, adds a bias, and passes the result through a non-linear activation function.</p>
+        <div class="math-block">
+          <div class="math-label">The Neuron Equation</div>
+          output = activation( Σ(wᵢ · xᵢ) + b )<br><br>
+          Where:<br>
+          &nbsp;&nbsp;x = input vector<br>
+          &nbsp;&nbsp;w = learned weight vector<br>
+          &nbsp;&nbsp;b = learned bias scalar<br>
+          &nbsp;&nbsp;activation = non-linear function (ReLU, sigmoid, etc.)
+        </div>
+        <p>In matrix form for an entire layer of N neurons receiving input vector x:</p>
+        <div class="math-block">
+          <div class="math-label">Layer Matrix Form</div>
+          z = W·x + b<br>
+          a = activation(z)<br><br>
+          W ∈ ℝ^(N×M) &nbsp;&nbsp;— weight matrix (N neurons, M inputs each)<br>
+          b ∈ ℝ^N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— bias vector<br>
+          a ∈ ℝ^N &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— activation output vector
+        </div>
+        <p>This is the entire computation at one layer. The "deep" in deep learning simply means stacking many such layers — each one transforming the output of the previous.</p>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">1.3 — Why Depth Matters: Representation Learning</div>
+        <p>A single-layer network (a perceptron) can only learn linear decision boundaries. Adding depth creates a hierarchy of learned representations. This is not metaphorical — it is what actually happens when you visualize learned features in trained networks.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Layer Depth (CNN Example)</th><th>What Is Learned</th></tr></thead>
+            <tbody>
+              <tr><td>Layer 1–2</td><td>Edges, color gradients, basic textures</td></tr>
+              <tr><td>Layer 3–5</td><td>Corners, curves, repeated patterns</td></tr>
+              <tr><td>Layer 6–10</td><td>Object parts (eyes, wheels, windows)</td></tr>
+              <tr><td>Final layers</td><td>High-level semantic concepts ("dog face", "car")</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="key-insight">
+          <div class="key-insight-text">Deep learning does not require hand-crafted features. The network learns what features are useful directly from raw data, given enough data and compute.</div>
+          <div class="key-insight-sub">This is the core breakthrough that separates deep learning from classical ML. The feature engineering is replaced by architecture engineering.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" disabled>← Previous</button>
+      <span class="module-indicator">1 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(1)">Next: Architecture & Layers →</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 2 ==================== -->
+  <div class="module" id="module-1">
+    <div class="module-header" data-num="02">
+      <div class="module-eyebrow">
+        <span class="badge badge-blue">Module 02</span>
+        <span class="module-num-label">Foundation</span>
+      </div>
+      <h2>Network Architecture<br>& Layer Types</h2>
+      <p class="module-desc">A deep neural network is a directed graph of mathematical functions. Every layer type is a different transformation — each designed to exploit a specific structure in the data.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">2.1 — Core Layer Types and Their Purpose</div>
+        <p>Choosing which layers to use is architecture design — one of the most consequential decisions in building a model. Each layer type has a mathematical specialization.</p>
+        <div class="layer-grid">
+          <div class="layer-card">
+            <div class="layer-name">Dense / Fully Connected</div>
+            <div class="layer-formula">a = activation(W·x + b)</div>
+            <div class="layer-use">Global relationships</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">Convolutional (Conv2D)</div>
+            <div class="layer-formula">a[i,j] = Σ(K * I)[i,j] + b</div>
+            <div class="layer-use">Spatial patterns (images)</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">LSTM / GRU</div>
+            <div class="layer-formula">h_t = f(h_{t-1}, x_t)</div>
+            <div class="layer-use">Sequential / temporal data</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">Multi-Head Attention</div>
+            <div class="layer-formula">Attn = softmax(QKᵀ/√d_k)·V</div>
+            <div class="layer-use">Transformers / LLMs</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">BatchNorm / LayerNorm</div>
+            <div class="layer-formula">x̂ = (x − μ) / √(σ² + ε)</div>
+            <div class="layer-use">Training stability</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">Dropout</div>
+            <div class="layer-formula">x_i = 0 with prob p (train only)</div>
+            <div class="layer-use">Regularization</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">Embedding</div>
+            <div class="layer-formula">e = W_embed[token_id]</div>
+            <div class="layer-use">Discrete → dense vector</div>
+          </div>
+          <div class="layer-card">
+            <div class="layer-name">Residual / Skip Connection</div>
+            <div class="layer-formula">out = F(x) + x</div>
+            <div class="layer-use">Deep network training (ResNet)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">2.2 — Activation Functions: The Non-Linearity Engine</div>
+        <p>Without activation functions, a neural network of any depth is mathematically equivalent to a single linear transformation. Non-linearity is what gives neural networks their expressive power.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Activation</th><th>Formula</th><th>Range</th><th>Used Where</th><th>Problem Solved</th></tr></thead>
+            <tbody>
+              <tr><td><code>ReLU</code></td><td>max(0, x)</td><td>[0, ∞)</td><td>Hidden layers (CNNs)</td><td>Simple, fast, no vanishing in positive range</td></tr>
+              <tr><td><code>Leaky ReLU</code></td><td>max(0.01x, x)</td><td>(−∞, ∞)</td><td>Hidden layers</td><td>Fixes "dying ReLU" — dead neurons</td></tr>
+              <tr><td><code>GELU</code></td><td>x·Φ(x)</td><td>(−∞, ∞)</td><td>Transformers (BERT, GPT)</td><td>Smooth, probabilistic gating</td></tr>
+              <tr><td><code>Sigmoid</code></td><td>1/(1+e⁻ˣ)</td><td>(0, 1)</td><td>Binary output layer</td><td>Outputs probability</td></tr>
+              <tr><td><code>Softmax</code></td><td>eˣⁱ/Σeˣʲ</td><td>(0, 1), sums to 1</td><td>Multi-class output</td><td>Probability distribution over classes</td></tr>
+              <tr><td><code>Tanh</code></td><td>(eˣ−e⁻ˣ)/(eˣ+e⁻ˣ)</td><td>(−1, 1)</td><td>RNNs, gates</td><td>Zero-centered, better gradient flow</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">The Vanishing Gradient Problem</div>
+            <div class="callout-body">Sigmoid and Tanh saturate — their gradients approach zero at large input values. In deep networks, backpropagated gradients are multiplied together across layers. Multiplying many near-zero values makes the gradient exponentially small before reaching early layers. ReLU largely solved this, which is why deep networks became trainable post-2012.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">2.3 — The Transformer Architecture (Modern LLM Foundation)</div>
+        <p>Every major LLM today — GPT, Claude, Gemini, Llama — is built on the transformer. It replaced RNNs entirely for sequence tasks by processing all positions simultaneously using attention.</p>
+        <div class="math-block">
+          <div class="math-label">Scaled Dot-Product Attention</div>
+          Attention(Q, K, V) = softmax( QKᵀ / √d_k ) · V<br><br>
+          Q = query matrix  (what am I looking for?)<br>
+          K = key matrix    (what do I contain?)<br>
+          V = value matrix  (what do I output if matched?)<br>
+          d_k = key dimension (scaling prevents softmax saturation)
+        </div>
+        <p>Multi-head attention runs this computation H times in parallel with different learned projections, then concatenates results — allowing the model to attend to information from different representation subspaces simultaneously.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">PYTHON — Minimal Attention</span>
+            <div class="code-dots">
+              <div class="code-dot" style="background:#f85149"></div>
+              <div class="code-dot" style="background:#d29922"></div>
+              <div class="code-dot" style="background:#3fb950"></div>
+            </div>
+          </div>
+          <pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> <span class="fn">attention</span>(Q, K, V):
+    d_k = Q.shape[-<span class="num">1</span>]
+    <span class="cm"># Compute raw attention scores</span>
+    scores = torch.matmul(Q, K.transpose(-<span class="num">2</span>, -<span class="num">1</span>)) / (d_k ** <span class="num">0.5</span>)
+    <span class="cm"># Normalize to probability distribution</span>
+    weights = F.softmax(scores, dim=-<span class="num">1</span>)
+    <span class="cm"># Weighted sum of values</span>
+    <span class="kw">return</span> torch.matmul(weights, V)</pre>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" onclick="goTo(0)">← Module 01</button>
+      <span class="module-indicator">2 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(2)">Next: Data Pipelines →</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 3 ==================== -->
+  <div class="module" id="module-2">
+    <div class="module-header" data-num="03">
+      <div class="module-eyebrow">
+        <span class="badge badge-blue">Module 03</span>
+        <span class="module-num-label">Foundation</span>
+      </div>
+      <h2>Data Pipelines &<br>Representations</h2>
+      <p class="module-desc">Every modality — images, video, text, audio, tabular — must be converted to numerical tensors before a model can process it. This pipeline is where most production bugs live.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">3.1 — The Universal Rule: Everything Becomes a Tensor</div>
+        <p>A tensor is an N-dimensional array of floating-point numbers. It is the single data structure that flows through every layer of every neural network, regardless of the original data format.</p>
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <div class="pipeline-box">Raw Files</div>
+            <div class="pipeline-label">JPEG, MP4, TXT, CSV</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-box">Preprocessing</div>
+            <div class="pipeline-label">resize, normalize, tokenize</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-box">Dataset</div>
+            <div class="pipeline-label">index-addressable object</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-box">DataLoader</div>
+            <div class="pipeline-label">batch, shuffle, workers</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-box">GPU Tensor</div>
+            <div class="pipeline-label">CUDA memory</div>
+          </div>
+          <div class="pipeline-arrow">→</div>
+          <div class="pipeline-step">
+            <div class="pipeline-box">Forward Pass</div>
+            <div class="pipeline-label">model computation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">3.2 — Data Representations by Modality</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Modality</th><th>Raw Format</th><th>Preprocessing</th><th>Tensor Shape</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Image</strong></td><td>JPEG, PNG</td><td>Resize, normalize pixels [0,1] or [-1,1]</td><td><code>[B, C, H, W]</code> e.g. [32, 3, 224, 224]</td></tr>
+              <tr><td><strong>Video</strong></td><td>MP4, AVI</td><td>Sample frames, resize, normalize</td><td><code>[B, T, C, H, W]</code> e.g. [8, 16, 3, 224, 224]</td></tr>
+              <tr><td><strong>Text</strong></td><td>UTF-8 string</td><td>Tokenize → token IDs → embedding lookup</td><td><code>[B, L, D]</code> e.g. [32, 512, 768]</td></tr>
+              <tr><td><strong>Audio</strong></td><td>WAV, MP3</td><td>STFT → mel-spectrogram</td><td><code>[B, F, T]</code> frequency bins × time steps</td></tr>
+              <tr><td><strong>Tabular</strong></td><td>CSV</td><td>Normalize numerics, embed categoricals</td><td><code>[B, F]</code> batch × features</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>B = batch size, C = channels, H = height, W = width, T = time steps, L = sequence length, D = embedding dimension, F = features.</p>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">3.3 — Text Tokenization Deep Dive (LLM Input)</div>
+        <p>For language models, converting text to tensors is a multi-step process. The tokenizer is a learned component, not a simple rule.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">PYTHON — Tokenization Pipeline</span>
+            <div class="code-dots">
+              <div class="code-dot" style="background:#f85149"></div>
+              <div class="code-dot" style="background:#d29922"></div>
+              <div class="code-dot" style="background:#3fb950"></div>
+            </div>
+          </div>
+          <pre><span class="cm"># Step 1: Raw text</span>
+text = <span class="str">"Hello, world!"</span>
+
+<span class="cm"># Step 2: BPE tokenization → subword token IDs</span>
+<span class="cm"># "Hello" → [15496], "," → [11], " world" → [995], "!" → [0]</span>
+token_ids = tokenizer.encode(text)  <span class="cm"># → [15496, 11, 995, 0]</span>
+
+<span class="cm"># Step 3: Embedding lookup — each ID → dense vector of dim D</span>
+<span class="cm"># Embedding matrix W_e ∈ ℝ^(vocab_size × D)</span>
+embeddings = embedding_layer(token_ids)  <span class="cm"># → [4, 768]</span>
+
+<span class="cm"># Step 4: Add positional encoding (sinusoidal or learned)</span>
+embeddings = embeddings + positional_encoding[:len(token_ids)]
+
+<span class="cm"># Now shape [seq_len, embed_dim] ready for transformer layers</span></pre>
+        </div>
+        <div class="callout info">
+          <span class="callout-icon">💡</span>
+          <div class="callout-content">
+            <div class="callout-title">Why Subword Tokenization?</div>
+            <div class="callout-body">Character-level: too long sequences. Word-level: can't handle "unrecognized" words. BPE (Byte Pair Encoding) splits rare words into known subwords — "unbelievably" might become ["un", "believ", "ably"]. GPT-4 uses ~100,000 token vocabulary.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">3.4 — Data Augmentation as Regularization</div>
+        <p>Augmentation artificially expands the training set by applying label-preserving transformations. A model trained on augmented data generalizes better because it sees more variance in the input distribution.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">PYTHON — Image Augmentation Pipeline</span>
+            <div class="code-dots">
+              <div class="code-dot" style="background:#f85149"></div>
+              <div class="code-dot" style="background:#d29922"></div>
+              <div class="code-dot" style="background:#3fb950"></div>
+            </div>
+          </div>
+          <pre><span class="kw">import</span> torchvision.transforms <span class="kw">as</span> T
+
+<span class="var">train_transform</span> = T.Compose([
+    T.RandomHorizontalFlip(p=<span class="num">0.5</span>),
+    T.RandomCrop(<span class="num">32</span>, padding=<span class="num">4</span>),
+    T.ColorJitter(brightness=<span class="num">0.2</span>, contrast=<span class="num">0.2</span>),
+    T.RandomRotation(degrees=<span class="num">15</span>),
+    T.ToTensor(),
+    T.Normalize(mean=[<span class="num">0.485</span>, <span class="num">0.456</span>, <span class="num">0.406</span>],
+                 std=[<span class="num">0.229</span>, <span class="num">0.224</span>, <span class="num">0.225</span>]),
+])
+
+<span class="cm"># Validation: NO augmentation — only normalize</span>
+<span class="var">val_transform</span> = T.Compose([
+    T.ToTensor(),
+    T.Normalize(mean=[<span class="num">0.485</span>, <span class="num">0.456</span>, <span class="num">0.406</span>],
+                 std=[<span class="num">0.229</span>, <span class="num">0.224</span>, <span class="num">0.225</span>]),
+])</pre>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" onclick="goTo(1)">← Module 02</button>
+      <span class="module-indicator">3 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(3)">Next: Training & Backprop →</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 4 ==================== -->
+  <div class="module" id="module-3">
+    <div class="module-header" data-num="04">
+      <div class="module-eyebrow">
+        <span class="badge badge-purple">Module 04</span>
+        <span class="module-num-label">Core Mechanics</span>
+      </div>
+      <h2>Training &<br>Backpropagation</h2>
+      <p class="module-desc">The learning algorithm. Forward pass, loss computation, gradient calculation via the chain rule, and weight updates via optimizers. This is the mathematical engine of all deep learning.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">4.1 — The Training Loop: Full Picture</div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">PYTHON — Complete Training Loop</span>
+            <div class="code-dots">
+              <div class="code-dot" style="background:#f85149"></div>
+              <div class="code-dot" style="background:#d29922"></div>
+              <div class="code-dot" style="background:#3fb950"></div>
+            </div>
+          </div>
+          <pre><span class="kw">for</span> epoch <span class="kw">in</span> range(num_epochs):
+    <span class="kw">for</span> batch_x, batch_y <span class="kw">in</span> dataloader:
+        
+        <span class="cm"># 1. FORWARD PASS: data flows input → output</span>
+        predictions = model(batch_x)
+        
+        <span class="cm"># 2. LOSS: scalar measure of how wrong we are</span>
+        loss = criterion(predictions, batch_y)
+        
+        <span class="cm"># 3. ZERO GRADIENTS: clear accumulated grads from last step</span>
+        optimizer.zero_grad()
+        
+        <span class="cm"># 4. BACKWARD PASS: compute ∂loss/∂W for every W</span>
+        loss.backward()
+        
+        <span class="cm"># 5. GRADIENT CLIPPING: prevent exploding gradients</span>
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=<span class="num">1.0</span>)
+        
+        <span class="cm"># 6. WEIGHT UPDATE: optimizer adjusts all weights</span>
+        optimizer.step()
+        
+        <span class="cm"># 7. LR SCHEDULE (optional)</span>
+        scheduler.step()</pre>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">4.2 — Backpropagation: The Chain Rule Unfolded</div>
+        <p>Backpropagation is not magic — it is a systematic application of the calculus chain rule across a computational graph. Every operation in the forward pass must have a defined derivative so the gradient can flow backward.</p>
+        <div class="math-block">
+          <div class="math-label">Chain Rule: Two-Layer Network Example</div>
+          Forward:<br>
+          &nbsp;&nbsp;z₁ = W₁·x + b₁<br>
+          &nbsp;&nbsp;a₁ = ReLU(z₁)<br>
+          &nbsp;&nbsp;z₂ = W₂·a₁ + b₂<br>
+          &nbsp;&nbsp;ŷ = softmax(z₂)<br>
+          &nbsp;&nbsp;L = CrossEntropy(ŷ, y)<br><br>
+          Backward (chain rule):<br>
+          &nbsp;&nbsp;∂L/∂W₂ = ∂L/∂ŷ · ∂ŷ/∂z₂ · ∂z₂/∂W₂<br>
+          &nbsp;&nbsp;∂L/∂W₁ = ∂L/∂ŷ · ∂ŷ/∂z₂ · ∂z₂/∂a₁ · ∂a₁/∂z₁ · ∂z₁/∂W₁<br><br>
+          Each term is the local gradient of that operation.
+        </div>
+        <div class="callout warning">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-content">
+            <div class="callout-title">Does Data Flow Backward?</div>
+            <div class="callout-body">No. Input data is stationary. What flows backward are gradients — partial derivatives of the loss with respect to each weight. The same training data enters fresh through the forward pass in each epoch. Gradients are purely internal mathematical signals used to update weights.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">4.3 — Optimizers: How Weights Are Updated</div>
+        <p>The gradient tells you which direction to move. The optimizer determines how far and how to adapt that movement over time.</p>
+        <div class="math-block">
+          <div class="math-label">SGD (Stochastic Gradient Descent)</div>
+          W ← W − η · ∂L/∂W<br><br>
+          η = learning rate (most important hyperparameter)<br>
+          Simple, but slow and sensitive to learning rate choice.
+        </div>
+        <div class="math-block">
+          <div class="math-label">Adam (Adaptive Moment Estimation) — Industry Standard</div>
+          m_t = β₁·m_{t-1} + (1−β₁)·g_t &nbsp;&nbsp;&nbsp;← 1st moment (momentum)<br>
+          v_t = β₂·v_{t-1} + (1−β₂)·g_t² &nbsp;&nbsp;← 2nd moment (variance)<br>
+          m̂_t = m_t / (1−β₁ᵗ) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← bias correction<br>
+          v̂_t = v_t / (1−β₂ᵗ) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← bias correction<br>
+          W ← W − η · m̂_t / (√v̂_t + ε)<br><br>
+          Defaults: β₁=0.9, β₂=0.999, ε=1e-8, η=1e-3
+        </div>
+        <p>AdamW adds weight decay decoupled from the gradient update — it is the default for training transformers. The learning rate is almost always combined with a schedule: linear warmup for the first N steps, then cosine decay to zero.</p>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">4.4 — Loss Functions by Task</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Task</th><th>Loss Function</th><th>Formula</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Binary Classification</td><td>Binary Cross-Entropy</td><td><code>−[y·log(p) + (1−y)·log(1−p)]</code></td><td>Output: sigmoid</td></tr>
+              <tr><td>Multi-class</td><td>Categorical Cross-Entropy</td><td><code>−Σ yᵢ·log(pᵢ)</code></td><td>Output: softmax</td></tr>
+              <tr><td>Regression</td><td>MSE / MAE</td><td><code>(y−ŷ)² or |y−ŷ|</code></td><td>MAE more robust to outliers</td></tr>
+              <tr><td>Language Modeling</td><td>Cross-Entropy over vocab</td><td><code>−log P(next token)</code></td><td>Perplexity = e^(avg loss)</td></tr>
+              <tr><td>Object Detection</td><td>Focal Loss</td><td>Modified cross-entropy</td><td>Addresses class imbalance</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" onclick="goTo(2)">← Module 03</button>
+      <span class="module-indicator">4 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(4)">Next: Inference & Deployment →</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 5 ==================== -->
+  <div class="module" id="module-4">
+    <div class="module-header" data-num="05">
+      <div class="module-eyebrow">
+        <span class="badge badge-purple">Module 05</span>
+        <span class="module-num-label">Core Mechanics</span>
+      </div>
+      <h2>Inference &<br>Deployment</h2>
+      <p class="module-desc">Inference is the entire point — using a trained model to make predictions on new data. It is its own engineering discipline with distinct concerns from training.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">5.1 — Training vs Inference: Fundamental Differences</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Aspect</th><th>Training</th><th>Inference</th></tr></thead>
+            <tbody>
+              <tr><td>Gradients</td><td>Computed and stored</td><td>Never computed (<code>no_grad</code>)</td></tr>
+              <tr><td>Weights</td><td>Updated every step</td><td>Completely frozen</td></tr>
+              <tr><td>Dropout</td><td>Active (zeros random neurons)</td><td>Disabled (full network active)</td></tr>
+              <tr><td>BatchNorm</td><td>Running mean/var updated</td><td>Fixed statistics from training</td></tr>
+              <tr><td>Memory</td><td>Activations stored for backprop</td><td>Activations discarded immediately</td></tr>
+              <tr><td>Speed</td><td>Slow (gradient bookkeeping)</td><td>Significantly faster</td></tr>
+              <tr><td>Purpose</td><td>Minimize loss, adjust weights</td><td>Predict on new unseen data</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">PYTHON — Correct Inference Mode</span>
+            <div class="code-dots">
+              <div class="code-dot" style="background:#f85149"></div>
+              <div class="code-dot" style="background:#d29922"></div>
+              <div class="code-dot" style="background:#3fb950"></div>
+            </div>
+          </div>
+          <pre><span class="cm"># Switch model to evaluation mode (disables dropout, fixes BatchNorm)</span>
+model.eval()
+
+<span class="kw">with</span> torch.no_grad():  <span class="cm"># disables gradient computation engine</span>
+    <span class="kw">for</span> batch_x <span class="kw">in</span> test_loader:
+        predictions = model(batch_x)
+        <span class="cm"># predictions are the model's outputs — no weight updates occur</span>
+
+<span class="cm"># Common mistake: forgetting model.eval() causes Dropout to stay active</span>
+<span class="cm"># → non-deterministic, lower-quality predictions at inference time</span></pre>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">5.2 — Inference Optimization Techniques</div>
+        <p>Production inference has strict latency requirements. A model that achieves state-of-the-art accuracy but takes 10 seconds per query is useless. Inference optimization is a separate engineering domain.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Technique</th><th>What It Does</th><th>Tradeoff</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Quantization (INT8/FP16)</strong></td><td>Reduce weight precision from FP32 to lower bits</td><td>~2–4× speedup, ~1% accuracy drop</td></tr>
+              <tr><td><strong>ONNX Export</strong></td><td>Framework-agnostic model format, runtime optimization</td><td>Portability, hardware-specific gains</td></tr>
+              <tr><td><strong>TensorRT</strong></td><td>NVIDIA compiler — fuses ops, optimizes for GPU kernels</td><td>Large speedup, NVIDIA-only</td></tr>
+              <tr><td><strong>KV Cache (LLMs)</strong></td><td>Cache key/value tensors across auto-regressive steps</td><td>Memory for speed — essential for LLMs</td></tr>
+              <tr><td><strong>Batching</strong></td><td>Process multiple requests together on GPU</td><td>Latency vs throughput tradeoff</td></tr>
+              <tr><td><strong>Speculative Decoding</strong></td><td>Small model drafts tokens, large model verifies</td><td>~2–3× LLM throughput gain</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">5.3 — Post-Training Techniques</div>
+        <p>Modern production models are not deployed as trained — they are refined extensively before and after deployment.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Technique</th><th>Purpose</th><th>How</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Fine-tuning</strong></td><td>Adapt pretrained model to specific task/domain</td><td>Continue training on small task-specific dataset</td></tr>
+              <tr><td><strong>LoRA</strong></td><td>Parameter-efficient fine-tuning</td><td>Add low-rank adapter matrices; only train adapters (~0.1% params)</td></tr>
+              <tr><td><strong>RLHF</strong></td><td>Align LLM to human preferences</td><td>Train reward model on human rankings, optimize with PPO</td></tr>
+              <tr><td><strong>DPO</strong></td><td>Alignment without RL complexity</td><td>Direct optimization on preferred/rejected pairs</td></tr>
+              <tr><td><strong>Distillation</strong></td><td>Compress large model into small one</td><td>Train small model to mimic large model's output distribution</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" onclick="goTo(3)">← Module 04</button>
+      <span class="module-indicator">5 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(5)">Next: Interpretability →</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 6 ==================== -->
+  <div class="module" id="module-5">
+    <div class="module-header" data-num="06">
+      <div class="module-eyebrow">
+        <span class="badge badge-orange">Module 06</span>
+        <span class="module-num-label">Advanced</span>
+      </div>
+      <h2>Interpretability &<br>The Black Box</h2>
+      <p class="module-desc">Do we understand what deep learning models actually learn? Partially and imperfectly. This module covers what is known, what is not, and the frontier research attempting to close the gap.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">6.1 — The Black Box Problem</div>
+        <p>A trained neural network with billions of parameters is a mathematical function in an incomprehensibly high-dimensional space. No human can inspect the weights and understand what behavior they encode. This is not merely inconvenient — in safety-critical systems, it is dangerous.</p>
+        <div class="key-insight">
+          <div class="key-insight-text">The network has learned something — but we cannot directly read what it learned the way we can read code. We can only probe it from the outside.</div>
+          <div class="key-insight-sub">This is the central challenge of ML interpretability. Every interpretability method is an indirect measurement, not a direct audit.</div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">6.2 — Interpretability Techniques</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Approach</th><th>Tells You</th><th>Limitations</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Saliency Maps</strong></td><td>Gradient of output w.r.t. input pixels</td><td>Which input regions most affect prediction</td><td>Noisy, doesn't explain internal mechanism</td></tr>
+              <tr><td><strong>Grad-CAM</strong></td><td>Class activation mapping via gradients</td><td>Where in image the model "looked"</td><td>Coarse localization only</td></tr>
+              <tr><td><strong>Probing Classifiers</strong></td><td>Train linear classifier on frozen hidden layer</td><td>What information is encoded in a layer</td><td>Presence ≠ usage</td></tr>
+              <tr><td><strong>Attention Visualization</strong></td><td>Plot attention weights as heatmaps</td><td>Token-to-token attention patterns</td><td>Attention ≠ explanation (Jain & Wallace 2019)</td></tr>
+              <tr><td><strong>SHAP / LIME</strong></td><td>Local approximations around predictions</td><td>Feature importance per prediction</td><td>Approximate, not mechanistic</td></tr>
+              <tr><td><strong>Mechanistic Interp.</strong></td><td>Reverse-engineer circuits in the network</td><td>Specific algorithms implemented</td><td>Extremely slow, doesn't scale</td></tr>
+              <tr><td><strong>Sparse Autoencoders</strong></td><td>Decompose superposed neuron activations</td><td>Monosemantic features per neuron</td><td>Active research, not production-ready</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">6.3 — Superposition: Why Individual Neurons Are Hard to Read</div>
+        <p>A naive assumption is that each neuron in a trained network encodes exactly one concept. Empirical research has shown this is wrong. Neurons are polysemantic — they respond to multiple unrelated concepts simultaneously.</p>
+        <p>This happens because the model has more concepts to represent than it has neurons. It encodes multiple features per neuron using near-orthogonal directions in high-dimensional activation space. This is superposition — and it makes neuron-level interpretation fundamentally unreliable.</p>
+        <div class="callout info">
+          <span class="callout-icon">🔬</span>
+          <div class="callout-content">
+            <div class="callout-title">Anthropic's Mechanistic Interpretability Research</div>
+            <div class="callout-body">Research has identified specific computational circuits in transformers — "induction heads" that implement in-context learning, and "curve detectors" in CNNs. Sparse autoencoders are being used to decompose polysemantic neurons into interpretable monosemantic features. This is an active frontier with no production-ready solution yet.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" onclick="goTo(4)">← Module 05</button>
+      <span class="module-indicator">6 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(6)">Next: Adversarial ML & Security →</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 7 ==================== -->
+  <div class="module" id="module-6">
+    <div class="module-header" data-num="07">
+      <div class="module-eyebrow">
+        <span class="badge badge-orange">Module 07</span>
+        <span class="module-num-label">Advanced · Security</span>
+      </div>
+      <h2>Adversarial ML<br>& Security</h2>
+      <p class="module-desc">The complete threat model across every stage of the ML lifecycle — from data poisoning during creation to adversarial examples and prompt injection during production use.</p>
+    </div>
+    <div class="module-body">
+
+      <div class="lesson">
+        <div class="lesson-title">7.1 — Stage 1: Data Collection & Preparation</div>
+        <div class="attack-grid">
+          <div class="attack-card critical">
+            <div class="attack-name">Data Poisoning</div>
+            <div class="attack-severity">● Critical</div>
+            <div class="attack-desc">Attacker contaminates the training dataset. Poisoned samples alter learned weights permanently. Label flipping changes ground truth labels subtly enough to go undetected in large corpora.</div>
+            <div class="attack-mitigate">Dataset provenance tracking, outlier detection</div>
+          </div>
+          <div class="attack-card critical">
+            <div class="attack-name">Backdoor / Trojan Attack</div>
+            <div class="attack-severity">● Critical</div>
+            <div class="attack-desc">Inject training samples with a specific trigger pattern (e.g., a pixel patch) mapped to a target label. Model behaves normally on clean inputs but misclassifies any input containing the trigger — even after deployment.</div>
+            <div class="attack-mitigate">Neural Cleanse, STRIP detection, certified defenses</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Supply Chain Poisoning</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Poison public datasets (Hugging Face, Common Crawl) before they are consumed by downstream model trainers. Attackers have successfully demonstrated this against open web-scraped datasets.</div>
+            <div class="attack-mitigate">Hash verification, curated data sources, audit trails</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">7.2 — Stage 2: Training</div>
+        <div class="attack-grid">
+          <div class="attack-card critical">
+            <div class="attack-name">Gradient Leakage (DLG)</div>
+            <div class="attack-severity">● Critical</div>
+            <div class="attack-desc">In federated learning, gradients shared between nodes can reconstruct original training data with high fidelity. The Deep Leakage from Gradients (DLG) attack demonstrated recovery of private images and text from gradient updates alone.</div>
+            <div class="attack-mitigate">Differential privacy (DP-SGD), gradient compression, secure aggregation</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Membership Inference</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Determine whether a specific record was in the training dataset. Models overfit and behave differently on seen vs unseen samples — this confidence gap is the attack signal. Severe for medical / biometric models.</div>
+            <div class="attack-mitigate">Differential privacy, regularization to reduce overfitting</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Model Inversion</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Iteratively query the model's output probabilities to reconstruct training data. Has been demonstrated on facial recognition models — recovering representative face images for each identity class.</div>
+            <div class="attack-mitigate">Output confidence truncation, query rate limiting</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">7.3 — Stage 3: Model Storage & Distribution</div>
+        <div class="attack-grid">
+          <div class="attack-card critical">
+            <div class="attack-name">Malicious Serialization (RCE)</div>
+            <div class="attack-severity">● Critical — CVE Class</div>
+            <div class="attack-desc">PyTorch's legacy <code>.pkl</code> format allows arbitrary code execution on <code>torch.load()</code>. A malicious model file can spawn a reverse shell when loaded by a victim. This is a real, documented attack class — not theoretical.</div>
+            <div class="attack-mitigate">Use safetensors format, never load untrusted .pt/.pkl files</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Model Extraction / Theft</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Attacker makes large numbers of queries to a deployed model and trains a surrogate that approximates its decision boundary. The surrogate can be analyzed offline to find adversarial examples, bypassing production audit logging.</div>
+            <div class="attack-mitigate">Rate limiting, query watermarking, output perturbation</div>
+          </div>
+          <div class="attack-card medium">
+            <div class="attack-name">Weight Tampering</div>
+            <div class="attack-severity">● Medium</div>
+            <div class="attack-desc">If model artifacts are stored without integrity controls, an attacker can modify weights directly — analogous to binary tampering in traditional software. Can introduce targeted misclassifications or hidden behaviors.</div>
+            <div class="attack-mitigate">Cryptographic signing, hash verification, immutable model registry</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">7.4 — Stage 4: Deployed Inference</div>
+        <div class="attack-grid">
+          <div class="attack-card critical">
+            <div class="attack-name">Adversarial Examples</div>
+            <div class="attack-severity">● Critical</div>
+            <div class="attack-desc">Imperceptible perturbations δ added to input x such that ‖δ‖ &lt; ε but model(x+δ) = target_class. FGSM (single-step), PGD (iterative), CW attack (optimization-based). Physical-world attacks exist on printed patches that fool real cameras.</div>
+            <div class="attack-mitigate">Adversarial training, input preprocessing defenses, certified robustness</div>
+          </div>
+          <div class="attack-card critical">
+            <div class="attack-name">Prompt Injection (LLMs)</div>
+            <div class="attack-severity">● Critical</div>
+            <div class="attack-desc">Malicious instructions in user input or retrieved documents override the model's intended behavior. Indirect injection plants instructions in web pages or database entries the LLM retrieves — model executes attacker's intent without user knowledge.</div>
+            <div class="attack-mitigate">Input sanitization, privilege separation, output filtering</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Jailbreaking</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Craft inputs that bypass safety alignment. Role-play framing, encoded instructions (Base64, leetspeak), many-shot compliance examples, and token-level GCG (Greedy Coordinate Gradient) attacks that optimize adversarial suffixes.</div>
+            <div class="attack-mitigate">RLHF alignment, red-teaming, adversarial fine-tuning</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Sponge Examples (DoS)</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Inputs crafted to maximize computational cost during inference — long sequences hitting worst-case attention complexity O(n²), or inputs triggering maximum computation paths. Used to exhaust GPU resources and deny service.</div>
+            <div class="attack-mitigate">Input length limits, compute budgets, anomaly detection</div>
+          </div>
+          <div class="attack-card high">
+            <div class="attack-name">Training Data Extraction</div>
+            <div class="attack-severity">● High</div>
+            <div class="attack-desc">Repeatedly query an LLM to extract memorized training data — PII, source code, copyrighted content. Demonstrated against GPT-2 by Carlini et al., recovering verbatim training text including personal information.</div>
+            <div class="attack-mitigate">Differential privacy in training, deduplication, output monitoring</div>
+          </div>
+          <div class="attack-card medium">
+            <div class="attack-name">Evasion via Feature Space</div>
+            <div class="attack-severity">● Medium</div>
+            <div class="attack-desc">In security ML (malware/fraud detection), attacker mutates malicious artifact to move it into benign feature space — while preserving malicious functionality. The semantic preservation constraint is the key difficulty.</div>
+            <div class="attack-mitigate">Ensemble models, behavioral analysis beyond static features</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <div class="lesson-title">7.5 — Defense-in-Depth: The Security Posture</div>
+        <div class="callout success">
+          <span class="callout-icon">🛡️</span>
+          <div class="callout-content">
+            <div class="callout-title">Treat the ML Model as Critical Infrastructure</div>
+            <div class="callout-body">Apply the same threat modeling you would to any production system. The model file is a binary artifact — sign it. The training data is a dependency — audit it. The inference endpoint is an API — rate limit and monitor it. The model's outputs are user-facing — filter and log them. No single defense is sufficient; the entire lifecycle requires controls.</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Lifecycle Stage</th><th>Primary Threats</th><th>Key Controls</th></tr></thead>
+            <tbody>
+              <tr><td>Data collection</td><td>Poisoning, supply chain</td><td>Provenance, hash verification, outlier detection</td></tr>
+              <tr><td>Training</td><td>Gradient leakage, membership inference</td><td>DP-SGD, secure aggregation, regularization</td></tr>
+              <tr><td>Storage</td><td>Weight tampering, malicious serialization</td><td>Safetensors, signing, immutable registry</td></tr>
+              <tr><td>Distribution</td><td>Model theft, extraction</td><td>Rate limiting, watermarking, auth</td></tr>
+              <tr><td>Inference</td><td>Adversarial inputs, prompt injection</td><td>Input validation, adversarial training, monitoring</td></tr>
+              <tr><td>Monitoring</td><td>Drift exploitation, shadow attacks</td><td>Distribution monitoring, anomaly detection, red-teaming</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="module-nav">
+      <button class="nav-btn" onclick="goTo(5)">← Module 06</button>
+      <span class="module-indicator">7 of 7</span>
+      <button class="nav-btn primary" onclick="goTo(0)" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--accent4);">↺ Restart Course</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  let currentModule = 0;
+  const totalModules = 7;
+  const visited = new Set([0]);
+
+  function goTo(idx) {
+    // Hide current
+    document.getElementById('module-' + currentModule).classList.remove('active');
+    document.querySelectorAll('.nav-item')[currentModule].classList.remove('active');
+    document.querySelectorAll('.nav-item')[currentModule].classList.add('completed');
+
+    // Mark visited
+    visited.add(idx);
+
+    // Show target
+    currentModule = idx;
+    document.getElementById('module-' + idx).classList.add('active');
+
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems[idx].classList.add('active');
+    navItems[idx].classList.remove('completed');
+
+    // Hero visibility
+    document.getElementById('hero').style.display = idx === 0 ? 'block' : 'none';
+
+    // Update progress
+    updateProgress();
+
+    // Scroll
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  function updateProgress() {
+    const pct = Math.round((visited.size / totalModules) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = visited.size + ' / ' + totalModules + ' modules';
+  }
+
+  function toggleMenu() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
